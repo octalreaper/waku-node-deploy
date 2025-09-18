@@ -1,66 +1,60 @@
----
-- name: Install Waku Node
-  hosts: all
-  become: yes
+- name: update
+  apt:
+    update_cache: yes
 
-  tasks:
-    - name: update
-      apt:
-        update_cache: yes
-
-    - name: install libpq-dev
-      apt:
-        name: libpq-dev
-        state: present
+- name: install libpq-dev
+  apt:
+    name: libpq-dev
+    state: present
         
-    - name: install libpcre3
-      apt:
-        name: libpcre3
-        state: present
+- name: install libpcre3
+  apt:
+    name: libpcre3
+    state: present
   
-    - name: Check if /root/waku exists
-      stat:
-        path: /root/waku
-      register: waku_folder
+- name: Check if /root/waku exists
+  stat:
+    path: /root/waku
+  register: waku_folder
 
-    - name: Fail if /root/waku already exists
-      fail:
-        msg: "Folder /root/waku already exists. Installation aborted."
-      when: waku_folder.stat.exists
+- name: Fail if /root/waku already exists
+  fail:
+    msg: "Folder /root/waku already exists. Installation aborted."
+  when: waku_folder.stat.exists
 
-    - name: Create /root/waku directory
-      file:
-        path: /root/waku
-        state: directory
-        mode: '0755'
+- name: Create /root/waku directory
+  file:
+    path: /root/waku
+    state: directory
+    mode: '0755'
 
-    - name: Download Waku binary
-      get_url:
-        url: https://github.com/waku-org/nwaku/releases/download/v0.33.0/nwaku-amd64-linux.tar.gz
-        dest: /root/waku/nwaku-amd64-linux.tar.gz
+- name: Download Waku binary
+  get_url:
+    url: https://github.com/waku-org/nwaku/releases/download/v0.33.0/nwaku-amd64-linux.tar.gz
+    dest: /root/waku/nwaku-amd64-linux.tar.gz
 
-    - name: Unzip Waku binary
-      unarchive:
-        src: /root/waku/nwaku-amd64-linux.tar.gz
-        dest: /root/waku
-        remote_src: yes
+- name: Unzip Waku binary
+  unarchive:
+    src: /root/waku/nwaku-amd64-linux.tar.gz
+    dest: /root/waku
+    remote_src: yes
 
-    - name: Delete the tar.gz file
-      file:
-        path: /root/waku/nwaku-amd64-linux.tar.gz
-        state: absent
+- name: Delete the tar.gz file
+  file:
+    path: /root/waku/nwaku-amd64-linux.tar.gz
+    state: absent
 
-    - name: Move wakunode2 binary to /root/waku
-      command: mv /root/waku/build/wakunode2 /root/waku/wakunode2
-      when: waku_folder.stat.exists == False
+- name: Move wakunode2 binary to /root/waku
+  command: mv /root/waku/build/wakunode2 /root/waku/wakunode2
+  when: waku_folder.stat.exists == False
 
-    - name: Remove build folder
-      file:
-        path: /root/waku/build
-        state: absent
+- name: Remove build folder
+  file:
+     path: /root/waku/build
+     state: absent
 
-    - name: Copy libnegentropy.so from local to remote
-      copy:
-        src: ./libnegentropy.so  # Ensure the lib is in the same directory as the playbook
-        dest: /root/waku/libnegentropy.so
-        mode: '0755'
+- name: Copy libnegentropy.so from local to remote
+  copy:
+    src: ./libnegentropy.so  # Ensure the lib is in the same directory as the playbook
+    dest: /root/waku/libnegentropy.so
+    mode: '0755'
