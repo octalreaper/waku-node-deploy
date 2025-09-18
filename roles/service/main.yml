@@ -1,0 +1,58 @@
+---
+- name: Install Waku Node
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Create systemd service file for Waku Node
+      copy:
+        dest: /etc/systemd/system/waku_node.service
+        content: |
+          [Unit]
+          Description=Waku Node
+          After=network.target
+          [Service]
+          ExecStart=/root/waku/wakunode2 \
+            --relay=true \
+            --filter=true \
+            --lightpush=true \
+            --keep-alive=true \
+            --max-connections=150 \
+            --cluster-id=1 \
+            --discv5-discovery=true \
+            --discv5-udp-port=9005 \
+            --discv5-enr-auto-update=True \
+            --log-level=DEBUG \
+            --tcp-port=30304 \
+            --metrics-server=True \
+            --metrics-server-port=8003 \
+            --metrics-server-address=127.0.0.1 \
+            --rest=true \
+            --rest-admin=true \
+            --rest-address=127.0.0.1 \
+            --rest-port=8645 \
+            --rest-allow-origin="waku-org.github.io" \
+            --rest-allow-origin="localhost:*" \
+            --nat=extip:{{ ansible_host }} \
+            --store=true \
+            --store-message-retention-policy=size:1GB \
+            --store-message-db-url="sqlite:///root/waku/store.sqlite3" \
+            --rln-relay-eth-client-address="https://sepolia.infura.io/v3/{{ infura_key }}" \
+            --rln-relay-tree-path="/root/waku/keystore/keystore.json" \
+            --rln-relay-cred-password="ergwergnwergopwerig" \
+            --rln-relay-eth-private-key="{{ eth_priv }}"
+          Restart=on-failure
+          User=root
+          Group=root
+          LimitNOFILE=4096
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd daemon
+      command: systemctl daemon-reload
+
+    - name: Enable and start Waku Node service
+      systemd:
+        name: waku_node
+        enabled: yes
+        state: started
