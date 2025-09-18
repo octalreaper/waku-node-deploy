@@ -1,0 +1,1 @@
+waku ansible_host=<IP> ansible_python_interpreter=/usr/bin/python3 ansible_user=root eth_priv=<ETH_PRIV_KEY> infura_key=<INFURA_KEY>
