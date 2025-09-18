@@ -1,0 +1,10 @@
+- name: Initial deploy
+  hosts: all
+  become: yes
+  # user: ubuntu
+  user: root
+  roles:
+    - firewall
+    - binary
+    - service
+    - register
